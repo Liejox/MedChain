@@ -1,7 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
-import { PatientDashboard } from "@/components/dashboard/patient-dashboard";
-import { DoctorDashboard } from "@/components/dashboard/doctor-dashboard";
-import { AdminDashboard } from "@/components/dashboard/admin-dashboard";
+import { PatientDIDDashboard } from "@/components/dashboard/patient-did-dashboard";
+import { DoctorDIDDashboard } from "@/components/dashboard/doctor-did-dashboard";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -10,12 +9,10 @@ export default function Dashboard() {
 
   switch (user.role) {
     case "patient":
-      return <PatientDashboard />;
+      return <PatientDIDDashboard />;
     case "doctor":
-      return <DoctorDashboard />;
-    case "admin":
-      return <AdminDashboard />;
+      return <DoctorDIDDashboard />;
     default:
-      return <div>Unknown role</div>;
+      return <div>Role not supported in DID mode</div>;
   }
 }

@@ -1,54 +1,48 @@
 import { 
-  users, patients, doctors, appointments, documents, credentials, notifications,
+  users, patients, doctors, verifiableCredentials, notifications, didProfiles,
   type User, type InsertUser, type Patient, type InsertPatient, 
-  type Doctor, type InsertDoctor, type Appointment, type InsertAppointment,
-  type Document, type InsertDocument, type Credential, type InsertCredential,
-  type Notification, type InsertNotification
+  type Doctor, type InsertDoctor, type VerifiableCredential, type InsertVerifiableCredential,
+  type Notification, type InsertNotification, type DidProfile, type InsertDidProfile,
+  type HealthcareCredentialType, type W3CVerifiableCredential
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, count } from "drizzle-orm";
+import { generateDID, generateKeyPair, createDIDDocument, createHealthcareVC, sampleHealthcareData } from "./did-utils";
 
 export interface IStorage {
-  // User operations
+  // DID User operations
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByDID(didIdentifier: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User>;
+
+  // DID Profile operations
+  getDidProfile(didIdentifier: string): Promise<DidProfile | undefined>;
+  createDidProfile(profile: InsertDidProfile): Promise<DidProfile>;
+  updateDidProfile(did: string, updates: Partial<DidProfile>): Promise<DidProfile>;
 
   // Patient operations
   getPatient(id: string): Promise<Patient | undefined>;
   getPatientByUserId(userId: string): Promise<Patient | undefined>;
+  getPatientByDID(didIdentifier: string): Promise<Patient | undefined>;
   createPatient(patient: InsertPatient): Promise<Patient>;
   updatePatient(id: string, updates: Partial<Patient>): Promise<Patient>;
 
   // Doctor operations
   getDoctor(id: string): Promise<Doctor | undefined>;
   getDoctorByUserId(userId: string): Promise<Doctor | undefined>;
+  getDoctorByDID(didIdentifier: string): Promise<Doctor | undefined>;
   createDoctor(doctor: InsertDoctor): Promise<Doctor>;
   updateDoctor(id: string, updates: Partial<Doctor>): Promise<Doctor>;
   getApprovedDoctors(): Promise<Doctor[]>;
 
-  // Appointment operations
-  getAppointment(id: string): Promise<Appointment | undefined>;
-  getAppointmentsByPatient(patientId: string): Promise<Appointment[]>;
-  getAppointmentsByDoctor(doctorId: string): Promise<Appointment[]>;
-  createAppointment(appointment: InsertAppointment): Promise<Appointment>;
-  updateAppointment(id: string, updates: Partial<Appointment>): Promise<Appointment>;
-
-  // Document operations
-  getDocument(id: string): Promise<Document | undefined>;
-  getDocumentsByPatient(patientId: string): Promise<Document[]>;
-  getDocumentsByDoctor(doctorId: string): Promise<Document[]>;
-  createDocument(document: InsertDocument): Promise<Document>;
-  updateDocument(id: string, updates: Partial<Document>): Promise<Document>;
-
-  // Credential operations
-  getCredential(id: string): Promise<Credential | undefined>;
-  getCredentialsByPatient(patientId: string): Promise<Credential[]>;
-  getCredentialsByDoctor(doctorId: string): Promise<Credential[]>;
-  createCredential(credential: InsertCredential): Promise<Credential>;
-  updateCredential(id: string, updates: Partial<Credential>): Promise<Credential>;
+  // Verifiable Credential operations
+  getVerifiableCredential(id: string): Promise<VerifiableCredential | undefined>;
+  getCredentialsBySubjectDID(subjectDid: string): Promise<VerifiableCredential[]>;
+  getCredentialsByIssuerDID(issuerDid: string): Promise<VerifiableCredential[]>;
+  createVerifiableCredential(credential: InsertVerifiableCredential): Promise<VerifiableCredential>;
+  updateVerifiableCredential(id: string, updates: Partial<VerifiableCredential>): Promise<VerifiableCredential>;
+  revokeCredential(id: string): Promise<void>;
 
   // Notification operations
   getNotificationsByUser(userId: string): Promise<Notification[]>;
@@ -57,6 +51,10 @@ export interface IStorage {
 
   // Dashboard stats
   getDashboardStats(userId: string, role: string): Promise<any>;
+
+  // DID Registration helpers
+  registerPatientWithDID(name: string, email: string, medicalData?: any): Promise<{ user: User, patient: Patient, didProfile: DidProfile }>;
+  registerDoctorWithDID(name: string, email: string, specialty: string, licenseNumber: string): Promise<{ user: User, doctor: Doctor, didProfile: DidProfile }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -65,13 +63,8 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
-  }
-
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+  async getUserByDID(didIdentifier: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.didIdentifier, didIdentifier));
     return user || undefined;
   }
 
@@ -85,6 +78,21 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getDidProfile(didIdentifier: string): Promise<DidProfile | undefined> {
+    const [profile] = await db.select().from(didProfiles).where(eq(didProfiles.didIdentifier, didIdentifier));
+    return profile || undefined;
+  }
+
+  async createDidProfile(insertProfile: InsertDidProfile): Promise<DidProfile> {
+    const [profile] = await db.insert(didProfiles).values(insertProfile).returning();
+    return profile;
+  }
+
+  async updateDidProfile(did: string, updates: Partial<DidProfile>): Promise<DidProfile> {
+    const [profile] = await db.update(didProfiles).set(updates).where(eq(didProfiles.didIdentifier, did)).returning();
+    return profile;
+  }
+
   async getPatient(id: string): Promise<Patient | undefined> {
     const [patient] = await db.select().from(patients).where(eq(patients.id, id));
     return patient || undefined;
@@ -93,6 +101,12 @@ export class DatabaseStorage implements IStorage {
   async getPatientByUserId(userId: string): Promise<Patient | undefined> {
     const [patient] = await db.select().from(patients).where(eq(patients.userId, userId));
     return patient || undefined;
+  }
+
+  async getPatientByDID(didIdentifier: string): Promise<Patient | undefined> {
+    const user = await this.getUserByDID(didIdentifier);
+    if (!user) return undefined;
+    return await this.getPatientByUserId(user.id);
   }
 
   async createPatient(insertPatient: InsertPatient): Promise<Patient> {
@@ -115,6 +129,12 @@ export class DatabaseStorage implements IStorage {
     return doctor || undefined;
   }
 
+  async getDoctorByDID(didIdentifier: string): Promise<Doctor | undefined> {
+    const user = await this.getUserByDID(didIdentifier);
+    if (!user) return undefined;
+    return await this.getDoctorByUserId(user.id);
+  }
+
   async createDoctor(insertDoctor: InsertDoctor): Promise<Doctor> {
     const [doctor] = await db.insert(doctors).values(insertDoctor).returning();
     return doctor;
@@ -129,73 +149,37 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(doctors).where(eq(doctors.isApproved, true));
   }
 
-  async getAppointment(id: string): Promise<Appointment | undefined> {
-    const [appointment] = await db.select().from(appointments).where(eq(appointments.id, id));
-    return appointment || undefined;
-  }
-
-  async getAppointmentsByPatient(patientId: string): Promise<Appointment[]> {
-    return await db.select().from(appointments).where(eq(appointments.patientId, patientId)).orderBy(desc(appointments.scheduledAt));
-  }
-
-  async getAppointmentsByDoctor(doctorId: string): Promise<Appointment[]> {
-    return await db.select().from(appointments).where(eq(appointments.doctorId, doctorId)).orderBy(desc(appointments.scheduledAt));
-  }
-
-  async createAppointment(insertAppointment: InsertAppointment): Promise<Appointment> {
-    const [appointment] = await db.insert(appointments).values(insertAppointment).returning();
-    return appointment;
-  }
-
-  async updateAppointment(id: string, updates: Partial<Appointment>): Promise<Appointment> {
-    const [appointment] = await db.update(appointments).set(updates).where(eq(appointments.id, id)).returning();
-    return appointment;
-  }
-
-  async getDocument(id: string): Promise<Document | undefined> {
-    const [document] = await db.select().from(documents).where(eq(documents.id, id));
-    return document || undefined;
-  }
-
-  async getDocumentsByPatient(patientId: string): Promise<Document[]> {
-    return await db.select().from(documents).where(eq(documents.patientId, patientId)).orderBy(desc(documents.createdAt));
-  }
-
-  async getDocumentsByDoctor(doctorId: string): Promise<Document[]> {
-    return await db.select().from(documents).where(eq(documents.doctorId, doctorId)).orderBy(desc(documents.createdAt));
-  }
-
-  async createDocument(insertDocument: InsertDocument): Promise<Document> {
-    const [document] = await db.insert(documents).values(insertDocument).returning();
-    return document;
-  }
-
-  async updateDocument(id: string, updates: Partial<Document>): Promise<Document> {
-    const [document] = await db.update(documents).set(updates).where(eq(documents.id, id)).returning();
-    return document;
-  }
-
-  async getCredential(id: string): Promise<Credential | undefined> {
-    const [credential] = await db.select().from(credentials).where(eq(credentials.id, id));
+  async getVerifiableCredential(id: string): Promise<VerifiableCredential | undefined> {
+    const [credential] = await db.select().from(verifiableCredentials).where(eq(verifiableCredentials.id, id));
     return credential || undefined;
   }
 
-  async getCredentialsByPatient(patientId: string): Promise<Credential[]> {
-    return await db.select().from(credentials).where(eq(credentials.holderId, patientId)).orderBy(desc(credentials.issuedAt));
+  async getCredentialsBySubjectDID(subjectDid: string): Promise<VerifiableCredential[]> {
+    return await db.select().from(verifiableCredentials)
+      .where(eq(verifiableCredentials.subjectDid, subjectDid))
+      .orderBy(desc(verifiableCredentials.issuanceDate));
   }
 
-  async getCredentialsByDoctor(doctorId: string): Promise<Credential[]> {
-    return await db.select().from(credentials).where(eq(credentials.issuerId, doctorId)).orderBy(desc(credentials.issuedAt));
+  async getCredentialsByIssuerDID(issuerDid: string): Promise<VerifiableCredential[]> {
+    return await db.select().from(verifiableCredentials)
+      .where(eq(verifiableCredentials.issuerDid, issuerDid))
+      .orderBy(desc(verifiableCredentials.issuanceDate));
   }
 
-  async createCredential(insertCredential: InsertCredential): Promise<Credential> {
-    const [credential] = await db.insert(credentials).values(insertCredential).returning();
+  async createVerifiableCredential(insertCredential: InsertVerifiableCredential): Promise<VerifiableCredential> {
+    const [credential] = await db.insert(verifiableCredentials).values(insertCredential).returning();
     return credential;
   }
 
-  async updateCredential(id: string, updates: Partial<Credential>): Promise<Credential> {
-    const [credential] = await db.update(credentials).set(updates).where(eq(credentials.id, id)).returning();
+  async updateVerifiableCredential(id: string, updates: Partial<VerifiableCredential>): Promise<VerifiableCredential> {
+    const [credential] = await db.update(verifiableCredentials).set(updates).where(eq(verifiableCredentials.id, id)).returning();
     return credential;
+  }
+
+  async revokeCredential(id: string): Promise<void> {
+    await db.update(verifiableCredentials)
+      .set({ isRevoked: true, status: 'revoked' })
+      .where(eq(verifiableCredentials.id, id));
   }
 
   async getNotificationsByUser(userId: string): Promise<Notification[]> {
@@ -212,45 +196,123 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDashboardStats(userId: string, role: string): Promise<any> {
+    const user = await this.getUser(userId);
+    if (!user) return {};
+
     if (role === 'patient') {
       const patient = await this.getPatientByUserId(userId);
       if (!patient) return {};
 
-      const appointmentCount = await db.select({ count: count() }).from(appointments).where(eq(appointments.patientId, patient.id));
-      const documentCount = await db.select({ count: count() }).from(documents).where(eq(documents.patientId, patient.id));
-      const credentialCount = await db.select({ count: count() }).from(credentials).where(eq(credentials.holderId, patient.id));
+      const credentialCount = await db.select({ count: count() })
+        .from(verifiableCredentials)
+        .where(eq(verifiableCredentials.subjectDid, user.didIdentifier));
 
       return {
-        totalAppointments: appointmentCount[0]?.count || 0,
-        totalDocuments: documentCount[0]?.count || 0,
         totalCredentials: credentialCount[0]?.count || 0,
+        didIdentifier: user.didIdentifier,
+        verifiedCredentials: credentialCount[0]?.count || 0,
       };
     } else if (role === 'doctor') {
       const doctor = await this.getDoctorByUserId(userId);
       if (!doctor) return {};
 
-      const patientCount = await db.select({ count: count() }).from(appointments).where(eq(appointments.doctorId, doctor.id));
-      const appointmentCount = await db.select({ count: count() }).from(appointments).where(eq(appointments.doctorId, doctor.id));
-      const credentialCount = await db.select({ count: count() }).from(credentials).where(eq(credentials.issuerId, doctor.id));
+      const issuedCount = await db.select({ count: count() })
+        .from(verifiableCredentials)
+        .where(eq(verifiableCredentials.issuerDid, user.didIdentifier));
+
+      const patientCount = await db.select({ count: count() })
+        .from(verifiableCredentials)
+        .where(eq(verifiableCredentials.issuerDid, user.didIdentifier));
 
       return {
+        credentialsIssued: issuedCount[0]?.count || 0,
         totalPatients: patientCount[0]?.count || 0,
-        totalAppointments: appointmentCount[0]?.count || 0,
-        credentialsIssued: credentialCount[0]?.count || 0,
+        didIdentifier: user.didIdentifier,
       };
     } else if (role === 'admin') {
       const userCount = await db.select({ count: count() }).from(users);
-      const doctorCount = await db.select({ count: count() }).from(doctors);
-      const patientCount = await db.select({ count: count() }).from(patients);
+      const credentialCount = await db.select({ count: count() }).from(verifiableCredentials);
 
       return {
         totalUsers: userCount[0]?.count || 0,
-        totalDoctors: doctorCount[0]?.count || 0,
-        totalPatients: patientCount[0]?.count || 0,
+        totalCredentials: credentialCount[0]?.count || 0,
+        activeCredentials: credentialCount[0]?.count || 0,
       };
     }
 
     return {};
+  }
+
+  async registerPatientWithDID(name: string, email: string, medicalData?: any): Promise<{ user: User, patient: Patient, didProfile: DidProfile }> {
+    const { privateKey, publicKey } = generateKeyPair();
+    const didIdentifier = generateDID('patient', name);
+    const didDocument = createDIDDocument(didIdentifier, publicKey);
+
+    // Create DID profile
+    const didProfile = await this.createDidProfile({
+      didIdentifier,
+      method: 'example',
+      didDocument,
+      publicKey,
+      privateKeyEncrypted: privateKey,
+      metadata: { createdFor: 'patient', email }
+    });
+
+    // Create user with DID
+    const user = await this.createUser({
+      didIdentifier,
+      role: 'patient',
+      firstName: name.split(' ')[0] || name,
+      lastName: name.split(' ')[1] || '',
+      publicKey,
+      didDocument,
+      isVerified: true
+    });
+
+    // Create patient profile
+    const patient = await this.createPatient({
+      userId: user.id,
+      medicalHistory: medicalData || {}
+    });
+
+    return { user, patient, didProfile };
+  }
+
+  async registerDoctorWithDID(name: string, email: string, specialty: string, licenseNumber: string): Promise<{ user: User, doctor: Doctor, didProfile: DidProfile }> {
+    const { privateKey, publicKey } = generateKeyPair();
+    const didIdentifier = generateDID('doctor', name);
+    const didDocument = createDIDDocument(didIdentifier, publicKey);
+
+    // Create DID profile
+    const didProfile = await this.createDidProfile({
+      didIdentifier,
+      method: 'example',
+      didDocument,
+      publicKey,
+      privateKeyEncrypted: privateKey,
+      metadata: { createdFor: 'doctor', email, specialty, licenseNumber }
+    });
+
+    // Create user with DID
+    const user = await this.createUser({
+      didIdentifier,
+      role: 'doctor',
+      firstName: name.split(' ')[0] || name,
+      lastName: name.split(' ')[1] || '',
+      publicKey,
+      didDocument,
+      isVerified: true
+    });
+
+    // Create doctor profile
+    const doctor = await this.createDoctor({
+      userId: user.id,
+      specialty,
+      licenseNumber,
+      isApproved: true
+    });
+
+    return { user, doctor, didProfile };
   }
 }
 

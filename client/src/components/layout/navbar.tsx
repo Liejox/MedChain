@@ -30,11 +30,9 @@ export function Navbar() {
   const getRoleDisplayName = (role: string) => {
     switch (role) {
       case "doctor":
-        return "Doctor Portal";
+        return "Healthcare Provider";
       case "patient":
         return "Patient Portal";
-      case "admin":
-        return "Admin Portal";
       default:
         return role;
     }
@@ -50,7 +48,7 @@ export function Navbar() {
                 <Shield className="h-5 w-5 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-800 dark:text-white">
-                MedChain
+                MedChain DID
               </span>
             </div>
 

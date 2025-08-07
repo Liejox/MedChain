@@ -5,14 +5,13 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  email: text("email").notNull().unique(),
-  password: text("password").notNull(),
+  didIdentifier: text("did_identifier").notNull().unique(), // Primary DID for auth
   role: text("role").notNull().default("patient"), // patient, doctor, admin
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   profilePicture: text("profile_picture"),
-  didIdentifier: text("did_identifier").unique(),
+  publicKey: text("public_key").notNull(), // Ed25519 public key
+  didDocument: json("did_document").notNull(), // Complete DID Document
   isVerified: boolean("is_verified").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -43,47 +42,30 @@ export const doctors = pgTable("doctors", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const appointments = pgTable("appointments", {
+// DID Profiles for enhanced DID management
+export const didProfiles = pgTable("did_profiles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  patientId: varchar("patient_id").notNull().references(() => patients.id, { onDelete: "cascade" }),
-  doctorId: varchar("doctor_id").notNull().references(() => doctors.id, { onDelete: "cascade" }),
-  scheduledAt: timestamp("scheduled_at").notNull(),
-  duration: integer("duration").notNull().default(30), // minutes
-  status: text("status").notNull().default("scheduled"), // scheduled, completed, cancelled
-  type: text("type").notNull().default("consultation"), // consultation, follow-up, surgery
-  notes: text("notes"),
+  didIdentifier: text("did_identifier").notNull().unique(),
+  method: text("method").notNull().default("example"), // did method
+  didDocument: json("did_document").notNull(),
+  publicKey: text("public_key").notNull(),
+  privateKeyEncrypted: text("private_key_encrypted"), // Mock encrypted private key
+  metadata: json("metadata"), // Additional DID metadata
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const documents = pgTable("documents", {
+export const verifiableCredentials = pgTable("verifiable_credentials", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  patientId: varchar("patient_id").notNull().references(() => patients.id, { onDelete: "cascade" }),
-  doctorId: varchar("doctor_id").references(() => doctors.id),
-  name: text("name").notNull(),
-  type: text("type").notNull(), // prescription, lab-report, diagnosis, image
-  filePath: text("file_path").notNull(),
-  fileSize: integer("file_size"),
-  mimeType: text("mime_type"),
-  isVerified: boolean("is_verified").default(false),
-  accessLevel: text("access_level").notNull().default("private"), // public, private, restricted
-  metadata: json("metadata"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-export const credentials = pgTable("credentials", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  issuerId: varchar("issuer_id").notNull().references(() => doctors.id, { onDelete: "cascade" }),
-  holderId: varchar("holder_id").notNull().references(() => patients.id, { onDelete: "cascade" }),
-  type: text("type").notNull(), // vaccination, diagnosis, surgery, lab-result
-  title: text("title").notNull(),
-  description: text("description"),
-  credentialData: json("credential_data").notNull(),
-  issuedAt: timestamp("issued_at").defaultNow(),
-  expiresAt: timestamp("expires_at"),
+  issuerDid: text("issuer_did").notNull(), // DID of issuer (doctor)
+  subjectDid: text("subject_did").notNull(), // DID of subject (patient)
+  credentialType: text("credential_type").notNull(), // HealthCheckupCredential, BloodTestCredential, VaccinationCredential, AppointmentCredential
+  vcData: json("vc_data").notNull(), // Complete W3C VC JSON-LD
+  proofSignature: text("proof_signature").notNull(), // Mock cryptographic proof
+  issuanceDate: timestamp("issuance_date").notNull(),
+  expirationDate: timestamp("expiration_date"),
   isRevoked: boolean("is_revoked").default(false),
-  vcHash: text("vc_hash").unique(),
+  status: text("status").notNull().default("active"), // active, revoked, expired
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -110,6 +92,10 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     references: [doctors.userId],
   }),
   notifications: many(notifications),
+  didProfile: one(didProfiles, {
+    fields: [users.didIdentifier],
+    references: [didProfiles.didIdentifier],
+  }),
 }));
 
 export const patientsRelations = relations(patients, ({ one, many }) => ({
@@ -117,9 +103,9 @@ export const patientsRelations = relations(patients, ({ one, many }) => ({
     fields: [patients.userId],
     references: [users.id],
   }),
-  appointments: many(appointments),
-  documents: many(documents),
-  credentials: many(credentials),
+  receivedCredentials: many(verifiableCredentials, {
+    relationName: "patientCredentials",
+  }),
 }));
 
 export const doctorsRelations = relations(doctors, ({ one, many }) => ({
@@ -127,41 +113,28 @@ export const doctorsRelations = relations(doctors, ({ one, many }) => ({
     fields: [doctors.userId],
     references: [users.id],
   }),
-  appointments: many(appointments),
-  issuedCredentials: many(credentials),
-  documents: many(documents),
-}));
-
-export const appointmentsRelations = relations(appointments, ({ one }) => ({
-  patient: one(patients, {
-    fields: [appointments.patientId],
-    references: [patients.id],
-  }),
-  doctor: one(doctors, {
-    fields: [appointments.doctorId],
-    references: [doctors.id],
+  issuedCredentials: many(verifiableCredentials, {
+    relationName: "doctorCredentials",
   }),
 }));
 
-export const documentsRelations = relations(documents, ({ one }) => ({
-  patient: one(patients, {
-    fields: [documents.patientId],
-    references: [patients.id],
-  }),
-  doctor: one(doctors, {
-    fields: [documents.doctorId],
-    references: [doctors.id],
+export const didProfilesRelations = relations(didProfiles, ({ one }) => ({
+  user: one(users, {
+    fields: [didProfiles.didIdentifier],
+    references: [users.didIdentifier],
   }),
 }));
 
-export const credentialsRelations = relations(credentials, ({ one }) => ({
+export const verifiableCredentialsRelations = relations(verifiableCredentials, ({ one }) => ({
   issuer: one(doctors, {
-    fields: [credentials.issuerId],
+    fields: [verifiableCredentials.issuerDid],
     references: [doctors.id],
+    relationName: "doctorCredentials",
   }),
-  holder: one(patients, {
-    fields: [credentials.holderId],
+  subject: one(patients, {
+    fields: [verifiableCredentials.subjectDid],
     references: [patients.id],
+    relationName: "patientCredentials",
   }),
 }));
 
@@ -191,19 +164,13 @@ export const insertDoctorSchema = createInsertSchema(doctors).omit({
   updatedAt: true,
 });
 
-export const insertAppointmentSchema = createInsertSchema(appointments).omit({
+export const insertDidProfileSchema = createInsertSchema(didProfiles).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const insertDocumentSchema = createInsertSchema(documents).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertCredentialSchema = createInsertSchema(credentials).omit({
+export const insertVerifiableCredentialSchema = createInsertSchema(verifiableCredentials).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -221,11 +188,36 @@ export type Patient = typeof patients.$inferSelect;
 export type InsertPatient = z.infer<typeof insertPatientSchema>;
 export type Doctor = typeof doctors.$inferSelect;
 export type InsertDoctor = z.infer<typeof insertDoctorSchema>;
-export type Appointment = typeof appointments.$inferSelect;
-export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
-export type Document = typeof documents.$inferSelect;
-export type InsertDocument = z.infer<typeof insertDocumentSchema>;
-export type Credential = typeof credentials.$inferSelect;
-export type InsertCredential = z.infer<typeof insertCredentialSchema>;
+export type DidProfile = typeof didProfiles.$inferSelect;
+export type InsertDidProfile = z.infer<typeof insertDidProfileSchema>;
+export type VerifiableCredential = typeof verifiableCredentials.$inferSelect;
+export type InsertVerifiableCredential = z.infer<typeof insertVerifiableCredentialSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+
+// W3C VC Standard Types
+export interface W3CVerifiableCredential {
+  "@context": string[];
+  type: string[];
+  issuer: string;
+  issuanceDate: string;
+  credentialSubject: {
+    id: string;
+    [key: string]: any;
+  };
+  proof: {
+    type: string;
+    created: string;
+    verificationMethod: string;
+    proofPurpose: string;
+    jws: string;
+  };
+  expirationDate?: string;
+}
+
+// Healthcare VC Types
+export type HealthcareCredentialType = 
+  | "HealthCheckupCredential"
+  | "BloodTestCredential" 
+  | "VaccinationCredential"
+  | "AppointmentCredential";

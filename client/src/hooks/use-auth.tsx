@@ -3,20 +3,19 @@ import { useToast } from "@/hooks/use-toast";
 
 interface User {
   id: string;
-  username: string;
-  email: string;
+  didIdentifier: string;
   role: string;
   firstName: string;
   lastName: string;
   profilePicture?: string;
-  didIdentifier?: string;
+  publicKey: string;
+  didDocument: any;
   isVerified: boolean;
 }
 
 interface AuthContext {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  didLogin: (didIdentifier: string) => Promise<void>;
+  login: (credentials: { didIdentifier: string }) => Promise<void>;
   register: (userData: any) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
@@ -60,46 +59,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (email: string, password: string) => {
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (response.ok) {
-        const { user, token } = await response.json();
-        localStorage.setItem("token", token);
-        setUser(user);
-        toast({
-          title: "Login successful",
-          description: "Welcome back to MedChain!",
-        });
-      } else {
-        const { error } = await response.json();
-        throw new Error(error);
-      }
-    } catch (error: any) {
-      toast({
-        title: "Login failed",
-        description: error.message,
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
-
-  const didLogin = async (didIdentifier: string) => {
+  const login = async (credentials: { didIdentifier: string }) => {
     try {
       const response = await fetch("/api/auth/did-login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ didIdentifier }),
+        body: JSON.stringify(credentials),
       });
 
       if (response.ok) {
@@ -167,7 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, didLogin, register, logout, isLoading }}
+      value={{ user, login, register, logout, isLoading }}
     >
       {children}
     </AuthContext.Provider>

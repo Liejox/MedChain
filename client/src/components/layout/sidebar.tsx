@@ -11,7 +11,8 @@ import {
   Settings,
   Shield,
   UserCheck,
-  Building2
+  Building2,
+  Search
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 
@@ -29,26 +30,15 @@ export function Sidebar() {
     if (user.role === "patient") {
       return [
         ...baseItems,
-        { href: "/appointments", icon: Calendar, label: "Appointments" },
-        { href: "/documents", icon: FileText, label: "My Documents" },
         { href: "/credentials", icon: Award, label: "My Credentials" },
+        { href: "/verify", icon: Search, label: "Verify Credentials" },
         { href: "/settings", icon: Settings, label: "Settings" },
       ];
     } else if (user.role === "doctor") {
       return [
         ...baseItems,
-        { href: "/patients", icon: Users, label: "My Patients" },
-        { href: "/appointments", icon: Calendar, label: "Appointments" },
-        { href: "/documents", icon: FileText, label: "Documents" },
-        { href: "/credentials", icon: Award, label: "Credentials" },
-        { href: "/settings", icon: Settings, label: "Settings" },
-      ];
-    } else if (user.role === "admin") {
-      return [
-        ...baseItems,
-        { href: "/users", icon: Users, label: "User Management" },
-        { href: "/doctors", icon: UserCheck, label: "Doctor Approvals" },
-        { href: "/hospitals", icon: Building2, label: "Hospital Management" },
+        { href: "/credentials", icon: Award, label: "Issue Credentials" },
+        { href: "/verify", icon: Search, label: "Verify Credentials" },
         { href: "/settings", icon: Settings, label: "Settings" },
       ];
     }
@@ -73,15 +63,18 @@ export function Sidebar() {
             <h3 className="font-semibold text-gray-800 dark:text-white">
               {user.firstName} {user.lastName}
             </h3>
+            <div className="mt-2">
+              <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-xs">
+                <Shield className="h-3 w-3 mr-1" />
+                DID Verified
+              </Badge>
+            </div>
             <p className="text-sm text-cool-gray dark:text-gray-400 capitalize">
               {user.role}
             </p>
-            {user.isVerified && (
-              <div className="mt-2 flex items-center justify-center space-x-1">
-                <div className="w-2 h-2 bg-healthcare-green rounded-full"></div>
-                <span className="text-xs text-healthcare-green">DID Verified</span>
-              </div>
-            )}
+            <div className="mt-2 text-xs font-mono text-gray-500 truncate">
+              {user.didIdentifier}
+            </div>
           </div>
         </div>
 

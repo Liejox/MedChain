@@ -1,0 +1,124 @@
+Update my existing decentralized healthcare web application to focus entirely on Decentralized Identity (DID) and Verifiable Credentials (VCs). The goal is to simulate a real-world healthcare system that verifies and manages patient identities and healthcare data securely using DIDs and mock credentials.
+
+🎯 Functional Requirements:
+Replace all documents/reports with Verifiable Credentials (VCs).
+
+Use W3C DID and VC standards for identity and credential flows.
+
+Implement DID-based authentication for patients and doctors.
+
+Support credential issuance, verification, viewing, and history.
+
+🔐 DID Features:
+Secure login using DIDs (e.g., did:example:patient123)
+
+DID-based access control (only valid DIDs can view or issue credentials)
+
+View DID Profile with metadata: DID string, public key, method, etc.
+
+🩺 Simulated Healthcare Credentials:
+Integrate mock/fake Verifiable Credentials (VCs) for:
+
+🩺 General Health Checkup Report
+
+🧪 Blood Test Report
+
+🧬 Vaccination Record
+
+🗓️ Doctor Appointment Confirmation
+
+Each VC must:
+
+Follow JSON-LD or JWT format
+
+Include issuer (doctor DID), subject (patient DID), issue date, and healthcare data
+
+Include mock cryptographic proof (e.g., Ed25519Signature2020 or JWT signature)
+
+💡 Example VC Structure:
+json
+Copy
+Edit
+{
+  "@context": ["https://www.w3.org/2018/credentials/v1"],
+  "type": ["VerifiableCredential", "HealthCheckupCredential"],
+  "issuer": "did:example:doctor123",
+  "issuanceDate": "2025-08-07T10:00:00Z",
+  "credentialSubject": {
+    "id": "did:example:patient456",
+    "name": "John Doe",
+    "summary": "Normal BP and HR. No issues found."
+  },
+  "proof": {
+    "type": "Ed25519Signature2020",
+    "created": "2025-08-07T10:01:00Z",
+    "verificationMethod": "did:example:doctor123#key-1",
+    "proofPurpose": "assertionMethod",
+    "jws": "eyJ...mockSignature..."
+  }
+}
+🖥 UI Components & Pages:
+Login Page (DID-based auth only)
+
+Patient Dashboard:
+
+View: DID info, list of received credentials (VC cards)
+
+Credential details modal (JSON or visual)
+
+Doctor Dashboard:
+
+Issue VC form (select type, enter patient DID, auto-fill sample data)
+
+View issued credentials
+
+Verification Page:
+
+Paste VC JSON
+
+Show result: Valid / Invalid + metadata
+
+Credential History Page (timeline/filter view)
+
+🎨 Design Guidelines:
+Clean, minimal, modern layout (Material / Glassmorphism / Neumorphism)
+
+Responsive layout (mobile & desktop)
+
+Healthcare color scheme: light blues, greens, whites
+
+Rounded corners, shadows, soft UI
+
+Modern sans-serif font (like Inter, Open Sans)
+
+Micro-interactions (loading, success, error)
+
+Icons for VC types (🩺 🧪 💉 🗓️)
+
+🧩 UI Elements to Include:
+Navbar (Home, Dashboard, Verify, Logout)
+
+DID Profile Card
+
+Credential Cards (type, date, issuer, subject)
+
+VC Issue Form: dropdown + auto-fill + sign button
+
+Buttons: "Login with DID", "Issue VC", "Verify VC", "Logout"
+
+✅ Optional Add-on for AI/Design Tools (Figma, etc.):
+"Create full wireframes for the updated DID-based decentralized healthcare app with the following pages:
+
+Login with DID
+
+Patient Dashboard with VC viewer
+
+Doctor Dashboard with VC Issuance
+
+Credential Verification Page
+
+History/Logs Timeline
+Apply accessible design system, use modern cards/components, apply DID-based UX patterns."
+
+💡 Use hardcoded or simulated DID and VC data for demo/testing. You can use did:example:doctor123 and did:example:patient456.
+

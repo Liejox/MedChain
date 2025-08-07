@@ -15,6 +15,7 @@ import Documents from "@/pages/documents";
 import Credentials from "@/pages/credentials";
 import Appointments from "@/pages/appointments";
 import Settings from "@/pages/settings";
+import Verify from "@/pages/verify";
 
 function AppContent() {
   const { user, isLoading } = useAuth();
@@ -43,6 +44,7 @@ function AppContent() {
           <Route path="/documents" component={Documents} />
           <Route path="/credentials" component={Credentials} />
           <Route path="/appointments" component={Appointments} />
+          <Route path="/verify" component={Verify} />
           <Route path="/settings" component={Settings} />
           {/* Add role-specific routes */}
           {user.role === "doctor" && (
