@@ -1,0 +1,102 @@
+Design a futuristic, clean, and secure UI/UX for a Decentralized Healthcare Web Application leveraging Decentralized Identity (DID) and Verifiable Credentials (VCs). The app should streamline real-time patient-doctor interaction, secure medical document management, and role-specific dashboards for patients, doctors, and hospital administrators. Focus on trust, privacy, real-time access, and user-friendly design.
+
+🧠 Core Features:
+🔐 Secure Login & Onboarding using DID (wallet-based or QR scan)
+
+🏥 Role-Based Dashboards:
+
+👤 Patient: View health records, DID profile, appointment schedule, request VCs
+
+🧑‍⚕️ Doctor: View assigned patients, verify DID & VCs, upload diagnosis
+
+🏢 Hospital Admin: Manage doctors, approve access, generate global reports
+
+📁 Real-Time Medical Document Sharing:
+
+Upload & share prescriptions, lab reports, discharge summaries (PDF, images)
+
+Grant access via VC-based permissions
+
+📝 VC Issue/Verification:
+
+Doctors issue verified medical credentials (e.g., COVID Vaccination, Surgery record)
+
+Patients can request or present credentials to other providers
+
+🔍 Document & Credential History Logs:
+
+Timestamped and filterable
+
+📅 Appointment Scheduling:
+
+Book/reschedule with DID-backed doctor identity
+
+📌 Notifications System:
+
+Real-time updates for approvals, medical record updates, or document requests
+
+🎨 Design Style:
+Minimalist, professional layout using glassmorphism, material design, or neumorphism
+
+Calming, healthcare-themed color palette: Blues, Light Greens, Soft Whites
+
+Rounded corners, soft shadows, clear iconography, and modern font (e.g., Inter, Poppins)
+
+Dark Mode Optional
+
+📱 Components to Include:
+Navbar with user role-based options
+
+Sidebar (for doctors/admins)
+
+Cards for:
+
+DID profiles
+
+Medical credentials (VCs)
+
+Recent medical activity
+
+Secure forms (with validation):
+
+Upload document
+
+Issue VC
+
+Schedule appointment
+
+Action Buttons:
+
+“Issue Credential”, “Verify VC”, “View Document”, “Revoke Access”, “Logout”
+
+Micro-interactions for: loading, success/error feedback, form validation, etc.
+
+Mobile-first responsiveness
+
+📈 Optional Advanced Features:
+🧬 AI Chatbot: Help with medical queries, DID help, or app navigation
+
+📂 IPFS Integration: Store medical docs securely in decentralized storage
+
+🎥 Telemedicine Integration: Secure video consultation module
+
+🛡️ Access Control Management: DID-based ACL (Access Control List)
+
+📊 Health Analytics: Visual charts of vitals (if integrated with IoT devices)
+
+💡 Optional Add-on (for Figma AI Plugins):
+Create wireframes and high-fidelity UI layouts for each key screen in a Decentralized Healthcare Web App using DIDs:
+
+Login/Register with DID
+
+Dashboard (Patient / Doctor / Admin)
+
+VC Issuance & Verification Forms
+
+Upload/View Medical Documents
+
+Credential History
+
+Appointment Scheduler
+
+Real-Time Chat or Teleconsult Page
