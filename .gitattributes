@@ -10,6 +10,16 @@
 *.md text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+
+# Configuration files
+*.config.js text eol=lf
+*.config.ts text eol=lf
+tsconfig.json text eol=lf
+package.json text eol=lf
+package-lock.json text eol=lf
 
 # Declare files that are binary and should not be modified
 *.png binary
@@ -22,3 +32,4 @@
 *.woff2 binary
 *.ttf binary
 *.eot binary
+*.pdf binary

@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedChain - Decentralized Healthcare Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'medical-blue': '#2563EB',
+                        'healthcare-green': '#10B981',
+                        'digital-purple': '#8B5CF6',
+                        'soft-white': '#F8FAFC',
+                        'cool-gray': '#64748B'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif']
+                    },
+                    backdropBlur: {
+                        'xs': '2px'
+                    }
+                }
+            },
+            darkMode: 'class'
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .glassmorphism-dark {
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .medical-gradient {
+            background: linear-gradient(135deg, #2563EB 0%, #10B981 100%);
+        }
+    </style>
+</head>
+<body class="font-inter bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen">
+    
+    <!-- Navigation Header -->
+    <nav class="glassmorphism dark:glassmorphism-dark shadow-lg border-b border-white/20 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-10 h-10 medical-gradient rounded-xl flex items-center justify-center">
+                            <i class="fas fa-user-shield text-white text-lg"></i>
+                        </div>
+                        <span class="text-xl font-bold text-gray-800 dark:text-white">MedChain</span>
+                    </div>
+                    
+                    <!-- Role Indicator -->
+                    <div class="hidden md:flex items-center space-x-2 bg-healthcare-green/10 px-3 py-1 rounded-full">
+                        <div class="w-2 h-2 bg-healthcare-green rounded-full"></div>
+                        <span class="text-sm font-medium text-healthcare-green" data-bind="user.role">Doctor Portal</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <!-- Notifications -->
+                    <button class="relative p-2 text-gray-600 dark:text-gray-300 hover:text-medical-blue transition-colors">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                    </button>
+
+                    <!-- Dark Mode Toggle -->
+                    <button id="theme-toggle" class="p-2 text-gray-600 dark:text-gray-300 hover:text-medical-blue transition-colors">
+                        <i class="fas fa-moon dark:hidden text-lg"></i>
+                        <i class="fas fa-sun hidden dark:inline text-lg"></i>
+                    </button>
+
+                    <!-- User Profile -->
+                    <div class="flex items-center space-x-3">
+                        <!-- Profile picture of a medical professional -->
+                        <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100" alt="Dr. Sarah Johnson profile picture" class="w-8 h-8 rounded-full object-cover">
+                        <span class="hidden md:block text-sm font-medium text-gray-700 dark:text-gray-300" data-bind="user.name">Dr. Sarah Johnson</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 min-h-screen glassmorphism dark:glassmorphism-dark shadow-lg border-r border-white/20 hidden lg:block">
+            <div class="p-6">
+                <!-- DID Profile Card -->
+                <div class="bg-white/60 dark:bg-gray-800/60 rounded-xl p-4 mb-6 shadow-lg">
+                    <div class="text-center">
+                        <!-- Profile picture of a medical professional -->
+                        <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150" alt="Dr. Sarah Johnson profile picture" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-medical-blue">
+                        <h3 class="font-semibold text-gray-800 dark:text-white" data-bind="user.name">Dr. Sarah Johnson</h3>
+                        <p class="text-sm text-cool-gray dark:text-gray-400" data-bind="user.specialty">Cardiologist</p>
+                        <div class="mt-2 flex items-center justify-center space-x-1">
+                            <div class="w-2 h-2 bg-healthcare-green rounded-full"></div>
+                            <span class="text-xs text-healthcare-green">DID Verified</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Menu -->
+                <nav class="space-y-2">
+                    <a href="#dashboard" class="flex items-center space-x-3 px-4 py-2 text-medical-blue bg-medical-blue/10 rounded-lg font-medium">
+                        <i class="fas fa-chart-line w-5"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#patients" class="flex items-center space-x-3 px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-medical-blue hover:bg-medical-blue/10 rounded-lg transition-colors">
+                        <i class="fas fa-users w-5"></i>
+                        <span>My Patients</span>
+                    </a>
+                    <a href="#documents" class="flex items-center space-x-3 px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-medical-blue hover:bg-medical-blue/10 rounded-lg transition-colors">
+                        <i class="fas fa-file-medical w-5"></i>
+                        <span>Documents</span>
+                    </a>
+                    <a href="#credentials" class="flex items-center space-x-3 px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-medical-blue hover:bg-medical-blue/10 rounded-lg transition-colors">
+                        <i class="fas fa-certificate w-5"></i>
+                        <span>Credentials</span>
+                    </a>
+                    <a href="#appointments" class="flex items-center space-x-3 px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-medical-blue hover:bg-medical-blue/10 rounded-lg transition-colors">
+                        <i class="fas fa-calendar-alt w-5"></i>
+                        <span>Appointments</span>
+                    </a>
+                    <a href="#settings" class="flex items-center space-x-3 px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-medical-blue hover:bg-medical-blue/10 rounded-lg transition-colors">
+                        <i class="fas fa-cog w-5"></i>
+                        <span>Settings</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <!-- Page Header -->
+            <div class="mb-8">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Medical Dashboard</h1>
+                        <p class="mt-2 text-cool-gray dark:text-gray-400">Manage your patients and medical records securely</p>
+                    </div>
+                    <div class="mt-4 lg:mt-0 flex space-x-4">
+                        <button class="bg-medical-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+                            <i class="fas fa-plus"></i>
+                            <span>Issue Credential</span>
+                        </button>
+                        <button class="bg-healthcare-green text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
+                            <i class="fas fa-upload"></i>
+                            <span>Upload Document</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="glassmorphism dark:glassmorphism-dark rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-cool-gray dark:text-gray-400 text-sm font-medium">Total Patients</p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white" data-bind="stats.totalPatients">247</p>
+                        </div>
+                        <div class="w-12 h-12 bg-medical-blue/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-users text-medical-blue text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glassmorphism dark:glassmorphism-dark rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-cool-gray dark:text-gray-400 text-sm font-medium">Today's Appointments</p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white" data-bind="stats.todayAppointments">12</p>
+                        </div>
+                        <div class="w-12 h-12 bg-healthcare-green/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-calendar-check text-healthcare-green text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glassmorphism dark:glassmorphism-dark rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-cool-gray dark:text-gray-400 text-sm font-medium">Pending Reviews</p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white" data-bind="stats.pendingReviews">8</p>
+                        </div>
+                        <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glassmorphism dark:glassmorphism-dark rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-cool-gray dark:text-gray-400 text-sm font-medium">Credentials Issued</p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white" data-bind="stats.credentialsIssued">156</p>
+                        </div>
+                        <div class="w-12 h-12 bg-digital-purple/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-certificate text-digital-purple text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Recent Patients -->
+                <div class="lg:col-span-2">
+                    <div class="glassmorphism dark:glassmorphism-dark rounded-xl shadow-lg">
+                        <div class="p-6 border-b border-white/20">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Recent Patients</h2>
+                                <button class="text-medical-blue hover:text-blue-700 text-sm font-medium">View All</button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <!-- @MAP: recentPatients.map(patient => ( -->
+                            <div class="space-y-4">
+                                <div class="flex items-center space-x-4 p-4 bg-white/40 dark:bg-gray-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-gray-800/60 transition-colors cursor-pointer" data-mock="true">
+                                    <!-- Patient profile picture -->
+                                    <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100" alt="Patient Emily Chen profile picture" class="w-12 h-12 rounded-full object-cover">
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2">
+                                            <h3 class="font-medium text-gray-900 dark:text-white" data-bind="patient.name">Emily Chen</h3>
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-healthcare-green/10 text-healthcare-green">
+                                                <i class="fas fa-shield-alt mr-1"></i>DID Verified
+                                            </span>
+                                        </div>
+                                        <p class="text-sm text-cool-gray dark:text-gray-400" data-bind="patient.condition">Hypertension Follow-up</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white" data-bind="patient.lastVisit">2 hours ago</p>
+                                        <p class="text-xs text-cool-gray dark:text-gray-400">Last visit</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center space-x-4 p-4 bg-white/40 dark:bg-gray-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-gray-800/60 transition-colors cursor-pointer" data-mock="true">
+                                    <!-- Patient profile picture -->
+                                    <img src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100" alt="Patient Michael Rodriguez profile picture" class="w-12 h-12 rounded-full object-cover">
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2">
+                                            <h3 class="font-medium text-gray-900 dark:text-white" data-bind="patient.name">Michael Rodriguez</h3>
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-healthcare-green/10 text-healthcare-green">
+                                                <i class="fas fa-shield-alt mr-1"></i>DID Verified
+                                            </span>
+                                        </div>
+                                        <p class="text-sm text-cool-gray dark:text-gray-400" data-bind="patient.condition">Diabetes Management</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white" data-bind="patient.lastVisit">1 day ago</p>
+                                        <p class="text-xs text-cool-gray dark:text-gray-400">Last visit</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center space-x-4 p-4 bg-white/40 dark:bg-gray-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-gray-800/60 transition-colors cursor-pointer" data-mock="true">
+                                    <!-- Patient profile picture -->
+                                    <img src="https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100" alt="Patient Sarah Thompson profile picture" class="w-12 h-12 rounded-full object-cover">
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2">
+                                            <h3 class="font-medium text-gray-900 dark:text-white" data-bind="patient.name">Sarah Thompson</h3>
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-healthcare-green/10 text-healthcare-green">
+                                                <i class="fas fa-shield-alt mr-1"></i>DID Verified
+                                            </span>
+                                        </div>
+                                        <p class="text-sm text-cool-gray dark:text-gray-400" data-bind="patient.condition">Annual Checkup</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white" data-bind="patient.lastVisit">3 days ago</p>
+                                        <p class="text-xs text-cool-gray dark:text-gray-400">Last visit</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar Content -->
+                <div class="space-y-6">
+                    <!-- Upcoming Appointments -->
+                    <div class="glassmorphism dark:glassmorphism-dark rounded-xl shadow-lg">
+                        <div class="p-6 border-b border-white/20">
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Today's Schedule</h2>
+                        </div>
+                        <div class="p-6">
+                            <!-- @MAP: todayAppointments.map(appointment => ( -->
+                            <div class="space-y-4">
+                                <div class="flex items-center space-x-3" data-mock="true">
+                                    <div class="w-2 h-8 bg-medical-blue rounded-full"></div>
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-900 dark:text-white" data-bind="appointment.time">10:00 AM</p>
+                                        <p class="text-sm text-cool-gray dark:text-gray-400" data-bind="appointment.patient">John Smith - Consultation</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center space-x-3" data-mock="true">
+                                    <div class="w-2 h-8 bg-healthcare-green rounded-full"></div>
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-900 dark:text-white" data-bind="appointment.time">2:30 PM</p>
+                                        <p class="text-sm text-cool-gray dark:text-gray-400" data-bind="appointment.patient">Lisa Wang - Follow-up</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center space-x-3" data-mock="true">
+                                    <div class="w-2 h-8 bg-digital-purple rounded-full"></div>
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-900 dark:text-white" data-bind="appointment.time">4:00 PM</p>
+                                        <p class="text-sm text-cool-gray dark:text-gray-400" data-bind="appointment.patient">Robert Brown - Surgery Prep</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="glassmorphism dark:glassmorphism-dark rounded-xl shadow-lg">
+                        <div class="p-6 border-b border-white/20">
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Quick Actions</h2>
+                        </div>
+                        <div class="p-6 space-y-3">
+                            <button class="w-full flex items-center space-x-3 p-3 text-left bg-white/40 dark:bg-gray-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-gray-800/60 transition-colors" data-event="click:handleIssueCredential">
+                                <div class="w-10 h-10 bg-medical-blue/10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-certificate text-medical-blue"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white">Issue VC</p>
+                                    <p class="text-sm text-cool-gray dark:text-gray-400">Create medical credential</p>
+                                </div>
+                            </button>
+
+                            <button class="w-full flex items-center space-x-3 p-3 text-left bg-white/40 dark:bg-gray-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-gray-800/60 transition-colors" data-event="click:handleVerifyCredential">
+                                <div class="w-10 h-10 bg-healthcare-green/10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-check-shield text-healthcare-green"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white">Verify VC</p>
+                                    <p class="text-sm text-cool-gray dark:text-gray-400">Validate patient credential</p>
+                                </div>
+                            </button>
+
+                            <button class="w-full flex items-center space-x-3 p-3 text-left bg-white/40 dark:bg-gray-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-gray-800/60 transition-colors" data-event="click:handleUploadDocument">
+                                <div class="w-10 h-10 bg-digital-purple/10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-upload text-digital-purple"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white">Upload Doc</p>
+                                    <p class="text-sm text-cool-gray dark:text-gray-400">Add medical record</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document Management Section -->
+            <div class="mt-8">
+                <div class="glassmorphism dark:glassmorphism-dark rounded-xl shadow-lg">
+                    <div class="p-6 border-b border-white/20">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Recent Medical Documents</h2>
+                            <div class="flex space-x-2">
+                                <button class="px-4 py-2 bg-medical-blue text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                                    <i class="fas fa-filter mr-2"></i>Filter
+                                </button>
+                                <button class="px-4 py-2 bg-healthcare-green text-white rounded-lg hover:bg-green-700 transition-colors text-sm">
+                                    <i class="fas fa-download mr-2"></i>Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b border-white/20">
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Document</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Patient</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Type</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Date</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Status</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="space-y-2">
+                                    <!-- @MAP: recentDocuments.map(document => ( -->
+                                    <tr class="hover:bg-white/40 dark:hover:bg-gray-800/40 transition-colors" data-mock="true">
+                                        <td class="py-4 px-4">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-file-pdf text-red-600 text-sm"></i>
+                                                </div>
+                                                <span class="font-medium text-gray-900 dark:text-white" data-bind="document.name">Lab Results - Blood Work</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4 text-gray-700 dark:text-gray-300" data-bind="document.patient">Emily Chen</td>
+                                        <td class="py-4 px-4">
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                                                Laboratory
+                                            </span>
+                                        </td>
+                                        <td class="py-4 px-4 text-gray-700 dark:text-gray-300" data-bind="document.date">Dec 15, 2024</td>
+                                        <td class="py-4 px-4">
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-healthcare-green/10 text-healthcare-green">
+                                                <i class="fas fa-check mr-1"></i>Verified
+                                            </span>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <div class="flex space-x-2">
+                                                <button class="text-medical-blue hover:text-blue-700 text-sm" data-event="click:viewDocument">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="text-healthcare-green hover:text-green-700 text-sm" data-event="click:shareDocument">
+                                                    <i class="fas fa-share"></i>
+                                                </button>
+                                                <button class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 text-sm" data-event="click:downloadDocument">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr class="hover:bg-white/40 dark:hover:bg-gray-800/40 transition-colors" data-mock="true">
+                                        <td class="py-4 px-4">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-file-medical text-green-600 text-sm"></i>
+                                                </div>
+                                                <span class="font-medium text-gray-900 dark:text-white" data-bind="document.name">Prescription - Metformin</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4 text-gray-700 dark:text-gray-300" data-bind="document.patient">Michael Rodriguez</td>
+                                        <td class="py-4 px-4">
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                                                Prescription
+                                            </span>
+                                        </td>
+                                        <td class="py-4 px-4 text-gray-700 dark:text-gray-300" data-bind="document.date">Dec 14, 2024</td>
+                                        <td class="py-4 px-4">
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-healthcare-green/10 text-healthcare-green">
+                                                <i class="fas fa-check mr-1"></i>Verified
+                                            </span>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <div class="flex space-x-2">
+                                                <button class="text-medical-blue hover:text-blue-700 text-sm" data-event="click:viewDocument">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="text-healthcare-green hover:text-green-700 text-sm" data-event="click:shareDocument">
+                                                    <i class="fas fa-share"></i>
+                                                </button>
+                                                <button class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 text-sm" data-event="click:downloadDocument">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <!-- @END_MAP )) -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals and Overlays -->
+    
+    <!-- DID Authentication Modal -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center">
+        <div class="glassmorphism dark:glassmorphism-dark rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div class="text-center">
+                <div class="w-16 h-16 medical-gradient rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-user-shield text-white text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">DID Authentication</h2>
+                <p class="text-cool-gray dark:text-gray-400 mb-6">Scan QR code with your DID wallet or connect directly</p>
+                
+                <!-- QR Code Placeholder -->
+                <div class="w-48 h-48 bg-white rounded-xl mx-auto mb-6 flex items-center justify-center border-2 border-dashed border-gray-300">
+                    <div class="text-center">
+                        <i class="fas fa-qrcode text-4xl text-gray-400 mb-2"></i>
+                        <p class="text-sm text-gray-500">QR Code</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <button class="w-full bg-medical-blue text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                        Connect Wallet
+                    </button>
+                    <button class="w-full border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        Use Demo Account
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Credential Issuance Modal -->
+    <div id="credential-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center">
+        <div class="glassmorphism dark:glassmorphism-dark rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Issue Verifiable Credential</h2>
+                <button class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <form class="space-y-6" data-implementation="Should validate form before submission">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Patient DID</label>
+                    <input type="text" class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-medical-blue focus:border-transparent" placeholder="did:example:123..." data-mock="true">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Credential Type</label>
+                    <select class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-medical-blue focus:border-transparent" data-mock="true">
+                        <option>Vaccination Certificate</option>
+                        <option>Medical Diagnosis</option>
+                        <option>Surgery Record</option>
+                        <option>Lab Results</option>
+                        <option>Prescription</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Medical Details</label>
+                    <textarea class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-medical-blue focus:border-transparent h-24" placeholder="Enter medical details..." data-mock="true"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Expiration Date</label>
+                    <input type="date" class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:ring-2 focus:ring-medical-blue focus:border-transparent" data-mock="true">
+                </div>
+
+                <div class="flex space-x-4">
+                    <button type="button" class="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 bg-medical-blue text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium" data-event="click:handleIssueCredential">
+                        Issue Credential
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed top-20 right-6 z-50 space-y-4">
+        <!-- Success Toast -->
+        <div class="glassmorphism dark:glassmorphism-dark rounded-lg p-4 shadow-lg max-w-sm hidden" id="success-toast">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-healthcare-green/20 rounded-full flex items-center justify-center">
+                    <i class="fas fa-check text-healthcare-green"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900 dark:text-white">Success!</p>
+                    <p class="text-sm text-cool-gray dark:text-gray-400">Credential issued successfully</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Toast -->
+        <div class="glassmorphism dark:glassmorphism-dark rounded-lg p-4 shadow-lg max-w-sm hidden" id="error-toast">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-red-500"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900 dark:text-white">Error</p>
+                    <p class="text-sm text-cool-gray dark:text-gray-400">Failed to process request</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Dark mode toggle functionality
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            
+            // Check for saved theme preference or default to light mode
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            html.classList.toggle('dark', savedTheme === 'dark');
+            
+            themeToggle.addEventListener('click', () => {
+                html.classList.toggle('dark');
+                const newTheme = html.classList.contains('dark') ? 'dark' : 'light';
+                localStorage.setItem('theme', newTheme);
+            });
+
+            // Modal management
+            function showModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+            }
+
+            function hideModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            }
+
+            // Toast notification system
+            function showToast(type, message) {
+                const toast = document.getElementById(`${type}-toast`);
+                if (toast) {
+                    toast.classList.remove('hidden');
+                    setTimeout(() => {
+                        toast.classList.add('hidden');
+                    }, 3000);
+                }
+            }
+
+            // Demo functionality for buttons
+            document.addEventListener('click', (e) => {
+                const target = e.target.closest('[data-event]');
+                if (!target) return;
+
+                const event = target.getAttribute('data-event');
+                
+                switch(event) {
+                    case 'click:handleIssueCredential':
+                        showModal('credential-modal');
+                        break;
+                    case 'click:handleVerifyCredential':
+                        showToast('success', 'Credential verified successfully');
+                        break;
+                    case 'click:handleUploadDocument':
+                        // TODO: Implement file upload functionality
+                        showToast('success', 'Document uploaded successfully');
+                        break;
+                    case 'click:viewDocument':
+                        // TODO: Implement document viewer
+                        console.log('Opening document viewer...');
+                        break;
+                    case 'click:shareDocument':
+                        // TODO: Implement document sharing
+                        showToast('success', 'Document shared successfully');
+                        break;
+                    case 'click:downloadDocument':
+                        // TODO: Implement document download
+                        console.log('Downloading document...');
+                        break;
+                }
+            });
+
+            // Close modal when clicking outside
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0')) {
+                    const modals = ['auth-modal', 'credential-modal'];
+                    modals.forEach(modalId => hideModal(modalId));
+                }
+            });
+
+            // Simulate real-time updates
+            setInterval(() => {
+                // TODO: Implement WebSocket connection for real-time updates
+                // This would update patient status, new appointments, etc.
+                console.log('Checking for real-time updates...');
+            }, 30000);
+
+            // Initialize tooltips and other UI enhancements
+            document.addEventListener('DOMContentLoaded', () => {
+                // TODO: Initialize any additional UI components
+                console.log('MedChain Healthcare Platform initialized');
+            });
+        })();
+    </script>
+</body>
+</html>
