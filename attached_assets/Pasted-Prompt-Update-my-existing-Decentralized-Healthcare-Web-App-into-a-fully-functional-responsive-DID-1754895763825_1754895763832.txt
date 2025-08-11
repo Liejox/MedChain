@@ -1,0 +1,101 @@
+Prompt:
+
+Update my existing Decentralized Healthcare Web App into a fully functional, responsive DID-based authentication system focused entirely on Decentralized Identity (DID) login and verification.
+
+Core Requirements:
+
+Authentication System (DID-based)
+
+Login using DID authentication.
+
+Include a Register page for new DID creation.
+
+Pre-create one sample user with the following credentials:
+
+Username: demoUser
+
+Password: Demo@123
+
+DID: did:example:123456789abcdef
+
+This sample user should have pre-filled credentials and medical history.
+
+UI/UX Enhancements
+
+Modern, clean, responsive design with healthcare theme (blues, greens, whites).
+
+Glassmorphism or neumorphism for elegance.
+
+Pages: Login/Register, Patient Dashboard, Doctor Dashboard, Credential Management, DID Profile, History Logs.
+
+Use intuitive icons, rounded corners, and animations for loading, success, error states.
+
+Fully responsive for desktop and mobile.
+
+Backend & Database
+
+Build backend using Node.js + Express.
+
+Temporary database (JSON or SQLite) pre-filled with:
+
+DID details for demoUser
+
+Fake verifiable credentials: medical checkups, prescriptions, past appointments.
+
+Example health reports with metadata (date, doctor, type of report).
+
+API endpoints for:
+
+Login/Register with DID
+
+Fetching DID details and credentials
+
+Adding new credentials
+
+Verifying credentials
+
+Fake Credentials & Health Records
+
+Pre-load demoUser with:
+
+3 checkup records (with doctor name, date, summary)
+
+2 appointment bookings (past & upcoming)
+
+2 prescriptions (with medicine list)
+
+Each credential should be formatted as a Verifiable Credential (VC) with metadata and DID linkage.
+
+Functional Features
+
+DID login verification before accessing dashboard.
+
+Patients can view and share DID credentials.
+
+Doctors can verify DID credentials and issue new ones.
+
+Credential history page to track issued/received VCs.
+
+Logout feature with session handling.
+
+Tech Stack
+
+Frontend: React + TailwindCSS (modern UI components).
+
+Backend: Node.js + Express.
+
+Database: Temporary JSON or SQLite.
+
+DID Handling: Use a mock DID library for demonstration purposes.
+
+Prototype Behavior
+
+User logs in with DID (or registers a new DID).
+
+Upon login, dashboard shows DID info, medical history, and credentials.
+
+Ability to add, view, and verify credentials in real time.
+
+Doctor dashboard can search DID and validate credentials.
+
+Output the complete updated code (frontend + backend + database JSON) as a fully runnable project with step-by-step setup instructions.

@@ -113,9 +113,10 @@ export function LoginForm() {
         <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
           <CardContent className="pt-4">
             <div className="text-center text-sm text-blue-800 dark:text-blue-200">
-              <p className="font-medium">Default Login</p>
-              <p>Username: <span className="font-mono">healthuser</span></p>
-              <p>Password: <span className="font-mono">Health@123</span></p>
+              <p className="font-medium">Demo Account</p>
+              <p>Username: <span className="font-mono">demoUser</span></p>
+              <p>Password: <span className="font-mono">Demo@123</span></p>
+              <p className="text-xs mt-1">DID: <span className="font-mono">did:example:123456789abcdef</span></p>
             </div>
           </CardContent>
         </Card>

@@ -336,9 +336,14 @@ export class DatabaseStorage implements IStorage {
     // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
     
-    // Generate DID and keys
+    // Generate DID and keys - use specific DID for demoUser
     const { privateKey, publicKey } = generateKeyPair();
-    const didIdentifier = generateDID(role, `${firstName} ${lastName}`);
+    let didIdentifier: string;
+    if (username === 'demoUser') {
+      didIdentifier = 'did:example:123456789abcdef';
+    } else {
+      didIdentifier = generateDID(role, `${firstName} ${lastName}`);
+    }
     const didDocument = createDIDDocument(didIdentifier, publicKey);
 
     // Create DID profile
@@ -388,24 +393,24 @@ export class DatabaseStorage implements IStorage {
 
   async initializeDefaultUser(): Promise<void> {
     // Check if default user already exists
-    const existingUser = await this.getUserByUsername('healthuser');
+    const existingUser = await this.getUserByUsername('demoUser');
     if (existingUser) {
       return; // Default user already exists
     }
 
     // Create default user as specified in the requirements
     const defaultUserData = await this.registerUserWithPassword(
-      'healthuser',
-      'health@medchain.com',
-      'Health@123',
-      'Health',
+      'demoUser',
+      'demo@medchain.com',
+      'Demo@123',
+      'Demo',
       'User',
       'patient',
       {
         medicalHistory: {
           allergies: ['None known'],
-          medications: [],
-          conditions: []
+          medications: ['Vitamin D3', 'Omega-3'],
+          conditions: ['Hypertension (controlled)']
         }
       }
     );
@@ -430,17 +435,18 @@ export class DatabaseStorage implements IStorage {
       defaultUserData.user.didIdentifier,
       'HealthCheckupCredential',
       {
-        patientName: 'Health User',
-        checkupDate: '2025-08-10',
-        status: 'Fit',
+        patientName: 'Demo User',
+        checkupDate: '2025-01-15',
+        status: 'Good Health',
         vitals: {
-          bloodPressure: '120/80',
-          heartRate: '72 bpm',
-          temperature: '98.6°F',
-          weight: '70 kg',
+          bloodPressure: '118/78',
+          heartRate: '68 bpm',
+          temperature: '98.4°F',
+          weight: '72 kg',
           height: '175 cm'
         },
-        recommendations: 'Continue regular exercise and healthy diet'
+        recommendations: 'Continue regular exercise and maintain healthy diet',
+        doctorNotes: 'Annual physical exam completed. All vital signs within normal range.'
       }
     );
 
@@ -459,12 +465,13 @@ export class DatabaseStorage implements IStorage {
       defaultUserData.user.didIdentifier,
       'AppointmentCredential',
       {
-        patientName: 'Health User',
+        patientName: 'Demo User',
         doctorName: 'Dr. Jane Smith',
-        appointmentDate: '2025-08-15',
-        appointmentTime: '11:00 AM',
-        purpose: 'Follow-up consultation',
-        location: 'MedChain Clinic, Room 201'
+        appointmentDate: '2025-08-20',
+        appointmentTime: '2:00 PM',
+        purpose: 'Routine follow-up consultation',
+        location: 'MedChain Health Center, Suite 305',
+        status: 'Confirmed'
       }
     );
 
@@ -478,7 +485,137 @@ export class DatabaseStorage implements IStorage {
       expirationDate: appointmentVC.expirationDate ? new Date(appointmentVC.expirationDate) : undefined
     });
 
-    console.log('✅ Default user and sample data initialized successfully');
+    // Create additional sample credentials
+    // Prescription Credential #1
+    const prescriptionVC1 = createHealthcareVC(
+      doctorData.user.didIdentifier,
+      defaultUserData.user.didIdentifier,
+      'PrescriptionCredential',
+      {
+        patientName: 'Demo User',
+        doctorName: 'Dr. Jane Smith',
+        prescriptionDate: '2025-01-15',
+        medications: [
+          {
+            name: 'Lisinopril',
+            dosage: '10mg',
+            frequency: 'Once daily',
+            duration: '30 days',
+            refills: 2
+          },
+          {
+            name: 'Metformin',
+            dosage: '500mg',
+            frequency: 'Twice daily with meals',
+            duration: '90 days',
+            refills: 3
+          }
+        ],
+        instructions: 'Take medications as prescribed. Monitor blood pressure regularly.',
+        pharmacyNotes: 'Generic substitutions allowed'
+      }
+    );
+
+    await this.createVerifiableCredential({
+      issuerDid: doctorData.user.didIdentifier,
+      subjectDid: defaultUserData.user.didIdentifier,
+      credentialType: 'PrescriptionCredential',
+      vcData: prescriptionVC1,
+      proofSignature: prescriptionVC1.proof.jws,
+      issuanceDate: new Date(prescriptionVC1.issuanceDate),
+      expirationDate: prescriptionVC1.expirationDate ? new Date(prescriptionVC1.expirationDate) : undefined
+    });
+
+    // Blood Test Credential
+    const bloodTestVC = createHealthcareVC(
+      doctorData.user.didIdentifier,
+      defaultUserData.user.didIdentifier,
+      'BloodTestCredential',
+      {
+        patientName: 'Demo User',
+        testDate: '2025-01-10',
+        labName: 'MedChain Laboratory Services',
+        testType: 'Comprehensive Metabolic Panel',
+        results: {
+          glucose: '95 mg/dL (Normal)',
+          cholesterol: '180 mg/dL (Normal)',
+          triglycerides: '120 mg/dL (Normal)',
+          hdl: '55 mg/dL (Normal)',
+          ldl: '110 mg/dL (Normal)',
+          hemoglobin: '14.2 g/dL (Normal)',
+          hematocrit: '42% (Normal)'
+        },
+        interpretation: 'All values within normal range',
+        recommendedFollowUp: '12 months'
+      }
+    );
+
+    await this.createVerifiableCredential({
+      issuerDid: doctorData.user.didIdentifier,
+      subjectDid: defaultUserData.user.didIdentifier,
+      credentialType: 'BloodTestCredential',
+      vcData: bloodTestVC,
+      proofSignature: bloodTestVC.proof.jws,
+      issuanceDate: new Date(bloodTestVC.issuanceDate),
+      expirationDate: bloodTestVC.expirationDate ? new Date(bloodTestVC.expirationDate) : undefined
+    });
+
+    // Past Appointment Credential
+    const pastAppointmentVC = createHealthcareVC(
+      doctorData.user.didIdentifier,
+      defaultUserData.user.didIdentifier,
+      'AppointmentCredential',
+      {
+        patientName: 'Demo User',
+        doctorName: 'Dr. Jane Smith',
+        appointmentDate: '2024-12-20',
+        appointmentTime: '10:30 AM',
+        purpose: 'Hypertension follow-up',
+        location: 'MedChain Health Center, Suite 305',
+        status: 'Completed',
+        notes: 'Blood pressure well controlled. Continue current medication regimen.'
+      }
+    );
+
+    await this.createVerifiableCredential({
+      issuerDid: doctorData.user.didIdentifier,
+      subjectDid: defaultUserData.user.didIdentifier,
+      credentialType: 'AppointmentCredential',
+      vcData: pastAppointmentVC,
+      proofSignature: pastAppointmentVC.proof.jws,
+      issuanceDate: new Date(pastAppointmentVC.issuanceDate),
+      expirationDate: pastAppointmentVC.expirationDate ? new Date(pastAppointmentVC.expirationDate) : undefined
+    });
+
+    // Vaccination Credential
+    const vaccinationVC = createHealthcareVC(
+      doctorData.user.didIdentifier,
+      defaultUserData.user.didIdentifier,
+      'VaccinationCredential',
+      {
+        patientName: 'Demo User',
+        vaccineName: 'Influenza Vaccine (Flu Shot)',
+        vaccineManufacturer: 'Pfizer',
+        lotNumber: 'FL2024-001',
+        vaccinationDate: '2024-10-15',
+        administeredBy: 'Dr. Jane Smith',
+        location: 'MedChain Health Center',
+        nextDueDate: '2025-10-15',
+        batchInfo: 'Annual seasonal influenza vaccine'
+      }
+    );
+
+    await this.createVerifiableCredential({
+      issuerDid: doctorData.user.didIdentifier,
+      subjectDid: defaultUserData.user.didIdentifier,
+      credentialType: 'VaccinationCredential',
+      vcData: vaccinationVC,
+      proofSignature: vaccinationVC.proof.jws,
+      issuanceDate: new Date(vaccinationVC.issuanceDate),
+      expirationDate: vaccinationVC.expirationDate ? new Date(vaccinationVC.expirationDate) : undefined
+    });
+
+    console.log('✅ Default user and comprehensive sample data initialized successfully');
   }
 }
 

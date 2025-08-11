@@ -31,6 +31,7 @@ export function Sidebar() {
       return [
         ...baseItems,
         { href: "/credentials", icon: Award, label: "My Credentials" },
+        { href: "/did-profile", icon: Shield, label: "DID Profile" },
         { href: "/verify", icon: Search, label: "Verify Credentials" },
         { href: "/settings", icon: Settings, label: "Settings" },
       ];
@@ -38,6 +39,7 @@ export function Sidebar() {
       return [
         ...baseItems,
         { href: "/credentials", icon: Award, label: "Issue Credentials" },
+        { href: "/did-profile", icon: Shield, label: "DID Profile" },
         { href: "/verify", icon: Search, label: "Verify Credentials" },
         { href: "/settings", icon: Settings, label: "Settings" },
       ];

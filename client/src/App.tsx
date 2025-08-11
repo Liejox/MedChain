@@ -13,6 +13,7 @@ import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import Documents from "@/pages/documents";
 import Credentials from "@/pages/credentials";
+import DIDProfile from "@/pages/did-profile";
 import Appointments from "@/pages/appointments";
 import Settings from "@/pages/settings";
 import Verify from "@/pages/verify";
@@ -43,6 +44,7 @@ function AppContent() {
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/documents" component={Documents} />
           <Route path="/credentials" component={Credentials} />
+          <Route path="/did-profile" component={DIDProfile} />
           <Route path="/appointments" component={Appointments} />
           <Route path="/verify" component={Verify} />
           <Route path="/settings" component={Settings} />
