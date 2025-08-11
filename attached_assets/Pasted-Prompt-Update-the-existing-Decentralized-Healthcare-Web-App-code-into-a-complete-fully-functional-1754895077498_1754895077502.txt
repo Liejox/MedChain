@@ -1,0 +1,87 @@
+Prompt:
+
+Update the existing Decentralized Healthcare Web App code into a complete, fully functional DID-based authentication system with both backend and frontend, ensuring secure user login, registration, and credential management.
+
+Key Requirements:
+
+Authentication & DID Integration:
+
+Implement a secure login and registration system.
+
+Use Decentralized Identity (DID) for authentication and access control.
+
+Pre-create one default user for testing:
+
+Username: healthuser
+
+Password: Health@123
+
+Allow new users to register via the login page.
+
+Temporary Database:
+
+Implement a simple in-memory or JSON-based temporary database for quick testing (can be replaced with a real DB later).
+
+Store users, DIDs, and credentials in this database.
+
+Include example data such as:
+
+Fake DID: did:example:123456789abcdefghi
+
+Fake credentials:
+
+Health Checkup Report – Status: "Fit", Date: "2025-08-10"
+
+Doctor Appointment – Dr. Jane Smith, Date: "2025-08-15", Time: "11:00 AM"
+
+Features:
+
+Patient Dashboard: Show DID info, fake credentials, upcoming appointments.
+
+Doctor Dashboard: Verify patient’s DID and view issued credentials.
+
+Credential Management: Issue and verify credentials (mock functionality).
+
+History Page: Show all issued and received credentials.
+
+UI/UX Update:
+
+Fully responsive design (desktop + mobile).
+
+Apply modern style: glassmorphism / material design / neumorphism.
+
+Calming healthcare theme (blue, white, light green).
+
+Add micro-interactions for actions like login, verification, credential issuance.
+
+Clear typography, intuitive icons, rounded corners, modern font.
+
+Components: Navbar, sidebar (if needed), cards, tables for credentials, forms with validation, action buttons.
+
+Backend:
+
+Node.js + Express backend handling authentication, DID generation, credential storage/retrieval.
+
+API endpoints:
+
+/register – Create new user + DID.
+
+/login – Authenticate existing user.
+
+/credentials – Fetch, add, or verify credentials.
+
+Integration:
+
+Connect frontend (React + TailwindCSS) with backend via REST API.
+
+Ensure smooth authentication flow with JWT or session-based security.
+
+Final Output:
+
+A single runnable project folder with backend + frontend code.
+
+Default login with provided credentials and ability to register new users.
+
+All pages functional with example DID and credentials loaded from the temporary database.
+
+Goal: A polished, production-style decentralized healthcare app prototype with working DID-based authentication, example credentials, and a modern, user-friendly interface.
