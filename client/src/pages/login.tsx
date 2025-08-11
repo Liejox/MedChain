@@ -1,5 +1,5 @@
-import { DIDLoginForm } from "@/components/auth/did-login-form";
+import { LoginForm } from "@/components/auth/login-form";
 
 export default function Login() {
-  return <DIDLoginForm />;
+  return <LoginForm />;
 }

@@ -8,11 +8,14 @@ import {
 import { db } from "./db";
 import { eq, and, desc, count } from "drizzle-orm";
 import { generateDID, generateKeyPair, createDIDDocument, createHealthcareVC, sampleHealthcareData } from "./did-utils";
+import bcrypt from "bcrypt";
 
 export interface IStorage {
   // DID User operations
   getUser(id: string): Promise<User | undefined>;
   getUserByDID(didIdentifier: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User>;
 
@@ -55,6 +58,10 @@ export interface IStorage {
   // DID Registration helpers
   registerPatientWithDID(name: string, email: string, medicalData?: any): Promise<{ user: User, patient: Patient, didProfile: DidProfile }>;
   registerDoctorWithDID(name: string, email: string, specialty: string, licenseNumber: string): Promise<{ user: User, doctor: Doctor, didProfile: DidProfile }>;
+  
+  // Traditional auth helpers
+  registerUserWithPassword(username: string, email: string, password: string, firstName: string, lastName: string, role: string, extraData?: any): Promise<{ user: User, patient?: Patient, doctor?: Doctor, didProfile: DidProfile }>;
+  initializeDefaultUser(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -65,6 +72,16 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByDID(didIdentifier: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.didIdentifier, didIdentifier));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
     return user || undefined;
   }
 
@@ -313,6 +330,155 @@ export class DatabaseStorage implements IStorage {
     });
 
     return { user, doctor, didProfile };
+  }
+
+  async registerUserWithPassword(username: string, email: string, password: string, firstName: string, lastName: string, role: string, extraData?: any): Promise<{ user: User, patient?: Patient, doctor?: Doctor, didProfile: DidProfile }> {
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 10);
+    
+    // Generate DID and keys
+    const { privateKey, publicKey } = generateKeyPair();
+    const didIdentifier = generateDID(role, `${firstName} ${lastName}`);
+    const didDocument = createDIDDocument(didIdentifier, publicKey);
+
+    // Create DID profile
+    const didProfile = await this.createDidProfile({
+      didIdentifier,
+      method: 'example',
+      didDocument,
+      publicKey,
+      privateKeyEncrypted: privateKey,
+      metadata: { createdFor: role, email, username }
+    });
+
+    // Create user with traditional auth
+    const user = await this.createUser({
+      username,
+      email,
+      passwordHash,
+      didIdentifier,
+      role,
+      firstName,
+      lastName,
+      publicKey,
+      didDocument,
+      isVerified: true
+    });
+
+    let patient: Patient | undefined;
+    let doctor: Doctor | undefined;
+
+    // Create role-specific profile
+    if (role === 'patient') {
+      patient = await this.createPatient({
+        userId: user.id,
+        medicalHistory: extraData?.medicalHistory || {}
+      });
+    } else if (role === 'doctor') {
+      doctor = await this.createDoctor({
+        userId: user.id,
+        specialty: extraData?.specialty || 'General Medicine',
+        licenseNumber: extraData?.licenseNumber || `LIC-${Date.now()}`,
+        isApproved: true
+      });
+    }
+
+    return { user, patient, doctor, didProfile };
+  }
+
+  async initializeDefaultUser(): Promise<void> {
+    // Check if default user already exists
+    const existingUser = await this.getUserByUsername('healthuser');
+    if (existingUser) {
+      return; // Default user already exists
+    }
+
+    // Create default user as specified in the requirements
+    const defaultUserData = await this.registerUserWithPassword(
+      'healthuser',
+      'health@medchain.com',
+      'Health@123',
+      'Health',
+      'User',
+      'patient',
+      {
+        medicalHistory: {
+          allergies: ['None known'],
+          medications: [],
+          conditions: []
+        }
+      }
+    );
+
+    // Create some sample credentials for the default user
+    const doctorData = await this.registerUserWithPassword(
+      'drsmith',
+      'drsmith@medchain.com',
+      'Doctor@123',
+      'Jane',
+      'Smith',
+      'doctor',
+      {
+        specialty: 'Internal Medicine',
+        licenseNumber: 'MD-12345'
+      }
+    );
+
+    // Issue sample credentials to the default user
+    const healthCheckupVC = createHealthcareVC(
+      doctorData.user.didIdentifier,
+      defaultUserData.user.didIdentifier,
+      'HealthCheckupCredential',
+      {
+        patientName: 'Health User',
+        checkupDate: '2025-08-10',
+        status: 'Fit',
+        vitals: {
+          bloodPressure: '120/80',
+          heartRate: '72 bpm',
+          temperature: '98.6°F',
+          weight: '70 kg',
+          height: '175 cm'
+        },
+        recommendations: 'Continue regular exercise and healthy diet'
+      }
+    );
+
+    await this.createVerifiableCredential({
+      issuerDid: doctorData.user.didIdentifier,
+      subjectDid: defaultUserData.user.didIdentifier,
+      credentialType: 'HealthCheckupCredential',
+      vcData: healthCheckupVC,
+      proofSignature: healthCheckupVC.proof.jws,
+      issuanceDate: new Date(healthCheckupVC.issuanceDate),
+      expirationDate: healthCheckupVC.expirationDate ? new Date(healthCheckupVC.expirationDate) : undefined
+    });
+
+    const appointmentVC = createHealthcareVC(
+      doctorData.user.didIdentifier,
+      defaultUserData.user.didIdentifier,
+      'AppointmentCredential',
+      {
+        patientName: 'Health User',
+        doctorName: 'Dr. Jane Smith',
+        appointmentDate: '2025-08-15',
+        appointmentTime: '11:00 AM',
+        purpose: 'Follow-up consultation',
+        location: 'MedChain Clinic, Room 201'
+      }
+    );
+
+    await this.createVerifiableCredential({
+      issuerDid: doctorData.user.didIdentifier,
+      subjectDid: defaultUserData.user.didIdentifier,
+      credentialType: 'AppointmentCredential',
+      vcData: appointmentVC,
+      proofSignature: appointmentVC.proof.jws,
+      issuanceDate: new Date(appointmentVC.issuanceDate),
+      expirationDate: appointmentVC.expirationDate ? new Date(appointmentVC.expirationDate) : undefined
+    });
+
+    console.log('✅ Default user and sample data initialized successfully');
   }
 }
 

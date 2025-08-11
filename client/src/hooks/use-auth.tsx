@@ -15,7 +15,7 @@ interface User {
 
 interface AuthContext {
   user: User | null;
-  login: (credentials: { didIdentifier: string }) => Promise<void>;
+  login: (credentials: { username?: string; password?: string; didIdentifier?: string }) => Promise<void>;
   register: (userData: any) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
@@ -59,14 +59,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (credentials: { didIdentifier: string }) => {
+  const login = async (credentials: { username?: string; password?: string; didIdentifier?: string }) => {
     try {
-      const response = await fetch("/api/auth/did-login", {
+      let endpoint = "/api/auth/login";
+      let body = credentials;
+
+      // Use DID login if didIdentifier is provided
+      if (credentials.didIdentifier) {
+        endpoint = "/api/auth/did-login";
+        body = { didIdentifier: credentials.didIdentifier };
+      }
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(credentials),
+        body: JSON.stringify(body),
       });
 
       if (response.ok) {
@@ -74,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem("token", token);
         setUser(user);
         toast({
-          title: "DID authentication successful",
+          title: "Login successful",
           description: "Welcome back to MedChain!",
         });
       } else {
@@ -83,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error: any) {
       toast({
-        title: "DID authentication failed",
+        title: "Login failed",
         description: error.message,
         variant: "destructive",
       });
