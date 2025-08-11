@@ -339,8 +339,8 @@ export class DatabaseStorage implements IStorage {
     // Generate DID and keys - use specific DID for demoUser
     const { privateKey, publicKey } = generateKeyPair();
     let didIdentifier: string;
-    if (username === 'demoUser') {
-      didIdentifier = 'did:example:123456789abcdef';
+    if (username === 'johndoe') {
+      didIdentifier = 'did:example:patient123';
     } else {
       didIdentifier = generateDID(role, `${firstName} ${lastName}`);
     }
@@ -393,24 +393,24 @@ export class DatabaseStorage implements IStorage {
 
   async initializeDefaultUser(): Promise<void> {
     // Check if default user already exists
-    const existingUser = await this.getUserByUsername('demoUser');
+    const existingUser = await this.getUserByUsername('johndoe');
     if (existingUser) {
       return; // Default user already exists
     }
 
-    // Create default user as specified in the requirements
+    // Create default user as specified in the requirements - John Doe with DID: did:example:patient123
     const defaultUserData = await this.registerUserWithPassword(
-      'demoUser',
-      'demo@medchain.com',
-      'Demo@123',
-      'Demo',
-      'User',
+      'johndoe',
+      'john.doe@example.com',
+      'health123',
+      'John',
+      'Doe',
       'patient',
       {
         medicalHistory: {
           allergies: ['None known'],
-          medications: ['Vitamin D3', 'Omega-3'],
-          conditions: ['Hypertension (controlled)']
+          medications: ['Vitamin D3', 'Omega-3', 'Blood pressure medication'],
+          conditions: ['Hypertension (controlled)', 'Type 2 Diabetes (managed)']
         }
       }
     );
@@ -435,7 +435,7 @@ export class DatabaseStorage implements IStorage {
       defaultUserData.user.didIdentifier,
       'HealthCheckupCredential',
       {
-        patientName: 'Demo User',
+        patientName: 'John Doe',
         checkupDate: '2025-01-15',
         status: 'Good Health',
         vitals: {
@@ -465,7 +465,7 @@ export class DatabaseStorage implements IStorage {
       defaultUserData.user.didIdentifier,
       'AppointmentCredential',
       {
-        patientName: 'Demo User',
+        patientName: 'John Doe',
         doctorName: 'Dr. Jane Smith',
         appointmentDate: '2025-08-20',
         appointmentTime: '2:00 PM',
@@ -492,7 +492,7 @@ export class DatabaseStorage implements IStorage {
       defaultUserData.user.didIdentifier,
       'PrescriptionCredential',
       {
-        patientName: 'Demo User',
+        patientName: 'John Doe',
         doctorName: 'Dr. Jane Smith',
         prescriptionDate: '2025-01-15',
         medications: [
@@ -532,7 +532,7 @@ export class DatabaseStorage implements IStorage {
       defaultUserData.user.didIdentifier,
       'BloodTestCredential',
       {
-        patientName: 'Demo User',
+        patientName: 'John Doe',
         testDate: '2025-01-10',
         labName: 'MedChain Laboratory Services',
         testType: 'Comprehensive Metabolic Panel',
@@ -566,7 +566,7 @@ export class DatabaseStorage implements IStorage {
       defaultUserData.user.didIdentifier,
       'AppointmentCredential',
       {
-        patientName: 'Demo User',
+        patientName: 'John Doe',
         doctorName: 'Dr. Jane Smith',
         appointmentDate: '2024-12-20',
         appointmentTime: '10:30 AM',
@@ -593,7 +593,7 @@ export class DatabaseStorage implements IStorage {
       defaultUserData.user.didIdentifier,
       'VaccinationCredential',
       {
-        patientName: 'Demo User',
+        patientName: 'John Doe',
         vaccineName: 'Influenza Vaccine (Flu Shot)',
         vaccineManufacturer: 'Pfizer',
         lotNumber: 'FL2024-001',

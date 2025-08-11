@@ -2,7 +2,16 @@
 
 ## Overview
 
-MedChain is a full-stack decentralized healthcare web application that leverages Decentralized Identity (DID) and Verifiable Credentials (VCs) to create a secure, streamlined platform for healthcare document management and patient care coordination. The application supports three distinct user roles - patients, doctors, and administrators - each with tailored dashboards and functionality for managing medical records, scheduling appointments, and issuing/verifying medical credentials.
+MedChain is a full-stack decentralized healthcare web application that leverages Decentralized Identity (DID) and Verifiable Credentials (VCs) to create a secure, streamlined platform for healthcare document management and patient care coordination. The application features a **DID-first authentication system** with Google OAuth and traditional login as fallback methods. It supports patient and doctor roles with comprehensive credential management, featuring pre-loaded sample data for John Doe (did:example:patient123) including medical history, appointments, prescriptions, and verifiable credentials.
+
+## Recent Changes (January 2025)
+
+- **DID-First Authentication System**: Primary authentication via DID identifiers with wallet connection simulation
+- **Google OAuth Fallback**: Secondary authentication method with proper OAuth flow setup
+- **Traditional Login Fallback**: Username/password authentication as tertiary option
+- **Comprehensive Sample Data**: Pre-loaded John Doe with 6 detailed medical credentials (checkups, blood tests, prescriptions, appointments, vaccinations)
+- **Enhanced DID Profile Management**: Complete DID document viewing, key management, and identity verification
+- **Improved Glassmorphism UI**: Modern healthcare-themed design with enhanced user experience
 
 ## User Preferences
 
@@ -38,10 +47,12 @@ Preferred communication style: Simple, everyday language.
   - Notifications system for real-time updates
 
 ### Authentication & Authorization
-- **Traditional Auth**: Email/password with bcrypt hashing and JWT tokens
-- **DID Integration**: Decentralized Identity authentication for enhanced security
-- **Role-Based Access**: Three-tier permission system (patient/doctor/admin) with route protection
-- **Session Management**: JWT tokens with middleware-based verification
+- **DID-First Authentication**: Primary login using Decentralized Identity (DID) identifiers with simulated wallet connection
+- **Google OAuth Fallback**: Secondary authentication via Google OAuth2 for users preferring traditional social login
+- **Traditional Auth Fallback**: Tertiary username/password authentication with bcrypt hashing and JWT tokens
+- **DID Integration**: Complete Decentralized Identity system with DID document generation, key management, and credential verification
+- **Role-Based Access**: Two-tier permission system (patient/doctor) with route protection
+- **Session Management**: JWT tokens with middleware-based verification across all authentication methods
 
 ### File Management
 - **Upload Handling**: Secure file upload with type validation (images, PDFs, documents)

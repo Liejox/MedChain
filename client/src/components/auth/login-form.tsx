@@ -109,17 +109,15 @@ export function LoginForm() {
           </div>
         </div>
 
-        {/* Default Login Info */}
-        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-          <CardContent className="pt-4">
-            <div className="text-center text-sm text-blue-800 dark:text-blue-200">
-              <p className="font-medium">Demo Account</p>
-              <p>Username: <span className="font-mono">demoUser</span></p>
-              <p>Password: <span className="font-mono">Demo@123</span></p>
-              <p className="text-xs mt-1">DID: <span className="font-mono">did:example:123456789abcdef</span></p>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Demo Account Info for Traditional Login */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+          <div className="text-center text-sm text-blue-800 dark:text-blue-200">
+            <p className="font-medium">Demo Account - John Doe</p>
+            <p>Username: <span className="font-mono">johndoe</span></p>
+            <p>Password: <span className="font-mono">health123</span></p>
+            <p className="text-xs mt-1">Note: This user also has DID: <span className="font-mono">did:example:patient123</span></p>
+          </div>
+        </div>
 
         {/* Auth Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
